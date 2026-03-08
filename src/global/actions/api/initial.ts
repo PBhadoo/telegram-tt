@@ -62,6 +62,20 @@ addActionHandler('initApi', (global, actions): ActionReturnType => {
     .map(({ userId }) => userId)
     .filter(Boolean);
 
+  // Read proxy settings from localStorage
+  let proxyEnabled = false;
+  let proxyUrl = '';
+  try {
+    const proxyRaw = localStorage.getItem('tt_proxy_settings');
+    if (proxyRaw) {
+      const proxySettings = JSON.parse(proxyRaw);
+      proxyEnabled = Boolean(proxySettings.enabled);
+      proxyUrl = proxySettings.url || '';
+    }
+  } catch (e) {
+    // Ignore parse errors
+  }
+
   void initApi(actions.apiUpdate, {
     userAgent: navigator.userAgent,
     platform: PLATFORM_ENV,
@@ -78,6 +92,8 @@ addActionHandler('initApi', (global, actions): ActionReturnType => {
     isTestServerRequested: hasTestParam,
     accountIds,
     hasPasskeySupport: IS_WEBAUTHN_SUPPORTED,
+    proxyEnabled,
+    proxyUrl,
   });
 
   void setShouldEnableDebugLog(Boolean(shouldCollectDebugLogs));

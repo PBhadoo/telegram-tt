@@ -92,8 +92,12 @@ export async function init(initialArgs: ApiInitialArgs, onConnected?: NoneToVoid
     userAgent, platform, sessionData, isWebmSupported, maxBufferSize, webAuthToken, dcId,
     mockScenario, shouldForceHttpTransport, shouldAllowHttpTransport,
     shouldDebugExportedSenders, langCode, isTestServerRequested, accountIds,
-    hasPasskeySupport,
+    hasPasskeySupport, proxyEnabled, proxyUrl,
   } = initialArgs;
+
+  // Store proxy settings on self so PromisedWebSockets can access them
+  (self as any).proxyEnabled = Boolean(proxyEnabled);
+  (self as any).proxyUrl = proxyUrl || '';
 
   const session = new sessions.CallbackSession(sessionData, onSessionUpdate);
 

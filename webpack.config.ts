@@ -28,7 +28,7 @@ const {
   HTTPS_KEY_PATH = '',
 } = process.env;
 
-const DEFAULT_APP_TITLE = `Telegram${APP_ENV !== 'production' ? ' Beta' : ''}`;
+const DEFAULT_APP_TITLE = `Telegram Web A (MOD)${APP_ENV !== 'production' ? ' Beta' : ''}`;
 
 // GitHub workflow uses an empty string as the default value if it's not in repository variables, so we cannot define a default value here
 process.env.BASE_URL = process.env.BASE_URL || PRODUCTION_URL;
@@ -40,7 +40,7 @@ const {
 
 const CSP = `
   default-src 'self';
-  connect-src 'self' wss://*.web.telegram.org blob: http: https: ${APP_ENV === 'development' ? 'wss: ipc:' : ''};
+  connect-src 'self' wss://*.web.telegram.org wss://*.workers.dev blob: http: https: wss: ${APP_ENV === 'development' ? 'ipc:' : ''};
   script-src 'self' 'wasm-unsafe-eval' https://t.me/_websync_ https://telegram.me/_websync_;
   style-src 'self' 'unsafe-inline';
   img-src 'self' data: blob: https://ss3.4sqi.net/img/categories_v2/;

@@ -6,6 +6,28 @@ const closeError = new Error('WebSocket was closed');
 const CONNECTION_TIMEOUT = 3000;
 const MAX_TIMEOUT = 30000;
 
+// Regex to match Telegram WebSocket hostnames
+const TELEGRAM_WS_HOST_PATTERN = /^[a-z0-9-]+\.(?:web\.)?telegram\.org$/i;
+
+/**
+ * Reads proxy settings from the worker's `self` context.
+ * These are set by client.ts during initApi from localStorage values.
+ */
+function getProxyConfig(): { enabled: boolean; domain: string } {
+  try {
+    const enabled = Boolean((self as any).proxyEnabled);
+    let domain = ((self as any).proxyUrl || '') as string;
+    // Clean the domain: strip protocol prefixes and trailing slashes
+    domain = domain
+      .replace(/^https?:\/\//i, '')
+      .replace(/^wss?:\/\//i, '')
+      .replace(/\/+$/, '');
+    return { enabled, domain };
+  } catch {
+    return { enabled: false, domain: '' };
+  }
+}
+
 export default class PromisedWebSockets {
   private closed: boolean;
 
@@ -91,7 +113,23 @@ export default class PromisedWebSockets {
     });
     this.closed = false;
     this.website = this.getWebSocketLink(ip, port, isTestServer, isPremium);
-    this.client = new WebSocket(this.website, 'binary');
+
+    // Check if proxy is enabled and the host is a Telegram domain
+    const proxy = getProxyConfig();
+    if (proxy.enabled && proxy.domain && TELEGRAM_WS_HOST_PATTERN.test(ip)) {
+      // Route through the proxy worker:
+      // Original: wss://zws1.web.telegram.org:443/apiws
+      // Proxied:  wss://<proxy-domain>/zws1.web.telegram.org/apiws
+      const path = `/apiws${isTestServer ? '_test' : ''}${isPremium ? '_premium' : ''}`;
+      const proxyUrl = `wss://${proxy.domain}/${ip}${path}`;
+      // eslint-disable-next-line no-console
+      console.log(`[Proxy] 🌐 Routing ${ip}${path} → ${proxy.domain}`);
+      this.website = proxyUrl;
+      // CF Workers WebSocketPair doesn't support subprotocol negotiation, so omit 'binary'
+      this.client = new WebSocket(proxyUrl);
+    } else {
+      this.client = new WebSocket(this.website, 'binary');
+    }
     return new Promise((resolve, reject) => {
       if (!this.client) return;
       let hasResolved = false;

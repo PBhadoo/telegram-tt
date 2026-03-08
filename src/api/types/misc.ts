@@ -24,6 +24,8 @@ export interface ApiInitialArgs {
   isTestServerRequested?: boolean;
   accountIds?: string[];
   hasPasskeySupport?: boolean;
+  proxyEnabled?: boolean;
+  proxyUrl?: string;
 }
 
 export type ApiPasskeyOption = {
