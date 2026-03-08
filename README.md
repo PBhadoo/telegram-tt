@@ -1,58 +1,109 @@
-# Telegram Web A
+# Telegram Web A (MOD)
 
-This project won the first prize 🥇 at [Telegram Lightweight Client Contest](https://contest.com/javascript-web-3) and now is an official Telegram client available to anyone at [web.telegram.org/a](https://web.telegram.org/a).
+A **modified version** of [Telegram Web A](https://github.com/Ajaxy/telegram-tt) with built-in **WebSocket proxy support** for regions where Telegram access is restricted.
 
-According to the original contest rules, it has nearly zero dependencies and is fully based on its own [Teact](https://github.com/Ajaxy/teact) framework (which re-implements React paradigm). It also uses a custom version of [GramJS](https://github.com/gram-js/gramjs) as an MTProto implementation.
+> **Source:** [github.com/PBhadoo/telegram-tt](https://github.com/PBhadoo/telegram-tt)
 
-The project incorporates lots of technologically advanced features, modern Web APIs and techniques: WebSockets, Web Workers and WebAssembly, multi-level caching and PWA, voice recording and media streaming, cryptography and raw binary data operations, optimistic and progressive interfaces, complicated CSS/Canvas/SVG animations, reactive data streams, and so much more.
+## What's Different from Official Telegram Web A?
 
-Feel free to explore, provide feedback and contribute.
+- 🌐 **Proxy Support** — Connect through a WebSocket proxy (Cloudflare Workers / custom domain) when Telegram is blocked
+- 📝 **Proxy Settings on Login Page** — Toggle proxy on/off and enter your proxy domain before logging in
+- 🔗 **Any Proxy Domain** — Supports `*.workers.dev`, custom domains, or any valid proxy hostname
+- 🏷️ **Renamed to "Telegram Web A (MOD)"** to avoid confusion with the official client
 
-## Local setup
+## How Proxy Works
 
-```sh
-mv .env.example .env
-
-npm i
+```
+Browser (GramJS) → wss://your-proxy-domain/pluto.web.telegram.org/apiws → Telegram Server
 ```
 
-Obtain API ID and API hash on [my.telegram.org](https://my.telegram.org) and populate the `.env` file.
+1. User enables proxy and enters their proxy domain on the login page
+2. All Telegram WebSocket connections are automatically rewritten to route through the proxy
+3. The proxy bridges traffic bidirectionally: Browser ↔ Proxy Worker ↔ Telegram
 
-## Dev mode
+**Proxy Server:** Deploy your own using [TG-WS-API](https://github.com/CloudflareHackers/TG-WS-API) (Cloudflare Workers + Durable Objects)
+
+## Deploy to Cloudflare Pages
+
+### One-Click Setup
+
+1. Fork this repo
+2. Go to [Cloudflare Pages](https://dash.cloudflare.com/?to=/:account/pages) → **Create a project** → **Connect to Git**
+3. Select your forked repo and configure:
+
+| Setting | Value |
+|---------|-------|
+| **Framework preset** | `None` |
+| **Build command** | `npm run build:production` |
+| **Build output directory** | `dist` |
+| **Node.js version** | `22` (set via Environment Variable `NODE_VERSION` = `22`) |
+
+4. Add **Environment Variables**:
+
+| Variable | Value | Required |
+|----------|-------|----------|
+| `TELEGRAM_API_ID` | Your API ID from [my.telegram.org](https://my.telegram.org) | ✅ Yes |
+| `TELEGRAM_API_HASH` | Your API Hash from [my.telegram.org](https://my.telegram.org) | ✅ Yes |
+| `NODE_VERSION` | `22` | ✅ Yes |
+| `APP_TITLE` | `Telegram Web A (MOD)` | Optional |
+| `BASE_URL` | Your Pages URL (e.g. `https://tg.yourdomain.com/`) | Optional |
+
+5. Click **Save and Deploy**
+
+### Manual / CLI Deploy
 
 ```sh
+# Clone
+git clone https://github.com/PBhadoo/telegram-tt.git
+cd telegram-tt
+
+# Setup
+cp .env.example .env
+# Edit .env and add your TELEGRAM_API_ID and TELEGRAM_API_HASH
+
+npm i
+
+# Build
+npm run build:production
+
+# Output is in ./dist — deploy this folder to CF Pages
+npx wrangler pages deploy dist --project-name=your-project-name
+```
+
+### Build Reference
+
+| Command | Description |
+|---------|-------------|
+| `npm run build:production` | Production build |
+| `npm run build:dev` | Development build |
+| `npm run dev` | Local dev server (port 1234) |
+
+**Build output directory:** `dist`
+
+## Deploy Proxy Server (TG-WS-API)
+
+You also need a WebSocket proxy server. Deploy [TG-WS-API](https://github.com/CloudflareHackers/TG-WS-API):
+
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/CloudflareHackers/TG-WS-API)
+
+Once deployed, enter your worker domain (e.g. `tg-ws-api.your-account.workers.dev` or your custom domain) in the proxy settings on the login page.
+
+## Local Setup
+
+```sh
+cp .env.example .env
+# Add TELEGRAM_API_ID and TELEGRAM_API_HASH from https://my.telegram.org
+
+npm i
 npm run dev
 ```
 
-### Invoking API from console
+Open `http://localhost:1234`
 
-Start your dev server and locate GramJS worker in console context.
+## Original Project
 
-All constructors and functions available in global `GramJs` variable.
+This is a fork of the official [Telegram Web A](https://github.com/Ajaxy/telegram-tt) which won first prize 🥇 at the [Telegram Lightweight Client Contest](https://contest.com/javascript-web-3). It's fully based on [Teact](https://github.com/Ajaxy/teact) framework and uses [GramJS](https://github.com/gram-js/gramjs) for MTProto.
 
-Run `npm run gramjs:tl full` to get access to all available Telegram requests.
+## License
 
-Example usage:
-``` javascript
-await invoke(new GramJs.help.GetAppConfig())
-```
-
-### Dependencies
-* [GramJS](https://github.com/gram-js/gramjs) ([MIT License](https://github.com/gram-js/gramjs/blob/master/LICENSE))
-* [fflate](https://github.com/101arrowz/fflate) ([MIT License](https://github.com/101arrowz/fflate/blob/master/LICENSE))
-* [cryptography](https://github.com/spalt08/cryptography) ([Apache License 2.0](https://github.com/spalt08/cryptography/blob/master/LICENSE))
-* [emoji-data](https://github.com/iamcal/emoji-data) ([MIT License](https://github.com/iamcal/emoji-data/blob/master/LICENSE))
-* [twemoji-parser](https://github.com/twitter/twemoji-parser) ([MIT License](https://github.com/twitter/twemoji-parser/blob/master/LICENSE.md))
-* [rlottie](https://github.com/Samsung/rlottie) ([MIT License](https://github.com/Samsung/rlottie/blob/master/COPYING))
-* [opus-recorder](https://github.com/chris-rudmin/opus-recorder) ([Various Licenses](https://github.com/chris-rudmin/opus-recorder/blob/master/LICENSE.md))
-* [qr-code-styling](https://github.com/kozakdenys/qr-code-styling) ([MIT License](https://github.com/kozakdenys/qr-code-styling/blob/master/LICENSE))
-* [mp4box](https://github.com/gpac/mp4box.js) ([BSD-3-Clause license](https://github.com/gpac/mp4box.js/blob/master/LICENSE))
-* [music-metadata-browser](https://github.com/Borewit/music-metadata-browser) ([MIT License](https://github.com/Borewit/music-metadata-browser/blob/master/LICENSE.txt))
-* [lowlight](https://github.com/wooorm/lowlight) ([MIT License](https://github.com/wooorm/lowlight/blob/main/license))
-* [idb-keyval](https://github.com/jakearchibald/idb-keyval) ([Apache License 2.0](https://github.com/jakearchibald/idb-keyval/blob/main/LICENCE))
-* [fasttextweb](https://github.com/karmdesai/fastTextWeb)
-* webp-wasm
-* fastblur
-
-## Bug reports and Suggestions
-If you find an issue with this app, let Telegram know using the [Suggestions Platform](https://bugs.telegram.org/c/4002).
+[GPL-3.0-or-later](LICENSE)
