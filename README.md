@@ -47,6 +47,9 @@ Browser (GramJS) → wss://your-proxy-domain/pluto.web.telegram.org/apiws → Te
 | `NODE_VERSION` | `22` | ✅ Yes |
 | `APP_TITLE` | `Telegram Web A (MOD)` | Optional |
 | `BASE_URL` | Your Pages URL (e.g. `https://tg.yourdomain.com/`) | Optional |
+| `PROXY_URL` | Default proxy domain (e.g. `tg-ws-api.example.workers.dev`) | Optional |
+
+> **💡 `PROXY_URL`**: If set, proxy is auto-enabled for all users with this domain as default. Users can still override or disable it on the login page. Leave empty to let users configure it themselves.
 
 5. Click **Save and Deploy**
 

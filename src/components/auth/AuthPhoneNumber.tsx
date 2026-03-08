@@ -32,11 +32,18 @@ import monkeyPath from '../../assets/monkey.svg';
 
 const PROXY_SETTINGS_KEY = 'tt_proxy_settings';
 
+// Default proxy URL from environment variable (set at build time via PROXY_URL env var)
+const ENV_PROXY_URL = process.env.PROXY_URL || '';
+
 function getProxySettings(): { enabled: boolean; url: string } {
   try {
     const raw = localStorage.getItem(PROXY_SETTINGS_KEY);
     if (raw) return JSON.parse(raw);
   } catch {}
+  // If no user override in localStorage, use env default
+  if (ENV_PROXY_URL) {
+    return { enabled: true, url: ENV_PROXY_URL };
+  }
   return { enabled: false, url: '' };
 }
 

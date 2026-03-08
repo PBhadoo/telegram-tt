@@ -62,12 +62,14 @@ addActionHandler('initApi', (global, actions): ActionReturnType => {
     .map(({ userId }) => userId)
     .filter(Boolean);
 
-  // Read proxy settings from localStorage
-  let proxyEnabled = false;
-  let proxyUrl = '';
+  // Read proxy settings from localStorage, falling back to env variable PROXY_URL
+  const envProxyUrl = process.env.PROXY_URL || '';
+  let proxyEnabled = Boolean(envProxyUrl); // Auto-enable if env var is set
+  let proxyUrl = envProxyUrl;
   try {
     const proxyRaw = localStorage.getItem('tt_proxy_settings');
     if (proxyRaw) {
+      // User override from login page takes priority over env default
       const proxySettings = JSON.parse(proxyRaw);
       proxyEnabled = Boolean(proxySettings.enabled);
       proxyUrl = proxySettings.url || '';

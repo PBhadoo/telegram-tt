@@ -230,6 +230,7 @@ export default function createConfig(
         // eslint-disable-next-line no-null/no-null
         TEST_SESSION: null,
         BASE_URL,
+        PROXY_URL: '',
       }),
       // Updates each dev re-build to provide current git branch or commit hash
       new DefinePlugin({
